@@ -9,10 +9,6 @@ import pandas as pd
 import glob
 import seaborn as sns
 
-
-
-
-
 def download_data(province_id, year1=1981, year2=2024):
     # Checking the existence of the data folder
     data_folder = 'data'
@@ -67,6 +63,8 @@ def create_data_frame(folder_path):
     return result
 
 df = create_data_frame('./data')
+
+
 
 reg_id_name = {
     1: 'Вінницька',  2: 'Волинська',  3: 'Дніпропетровська',  4: 'Донецька',  5: 'Житомирська',
@@ -141,14 +139,19 @@ class SimpleApp(server.App):
 
 
         pivot_data = processed_data.pivot(index='Year', columns='Week', values=parameter)
+        fig, axes = plt.subplots(2, 1)
         plt.figure(figsize=(25, 20))
-        sns.heatmap(pivot_data, cmap="inferno", annot=True)
+        sns.heatmap(pivot_data, cmap="inferno", annot=True, ax=axes[0])
+        for year in processed_data['Year'].unique():
+        	yearly_data = processed_data[processed_data['Year'] == year]
+        	sns.lineplot(data=yearly_data, x='Week', y=parameter, ax=axes[1], label=str(year))	
+        
         plt.title(f'Heatmap {parameter} for region: {reg_id_name[region]}')
         plt.xlabel('Week')
         plt.ylabel('Year')
 
         plot = plt.gcf()
-        return plot
+        return fig
    
     
 app = SimpleApp()
